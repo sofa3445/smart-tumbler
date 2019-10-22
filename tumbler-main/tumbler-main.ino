@@ -1,51 +1,51 @@
-int trig=11;
-int echo=12;
-int led1=6; //RED
-int led2=9; //BLUE
+int trigpin=6;
+int echopin=7;
+
+int led1 =11;
+int led2 =10;
+int led3 =9;
 
 void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  pinMode(trig,OUTPUT);
-  pinMode(echo,INPUT);
-  pinMode(led1,OUTPUT);
-  pinMode(led2,OUTPUT);
+ Serial.begin(9600);
+  
+ pinMode(trigpin, OUTPUT);
+ pinMode(echopin,INPUT);
+ 
+ pinMode(led1,OUTPUT);
+ pinMode(led2,OUTPUT);
+ pinMode(led3,OUTPUT);
+
+ delay(1000);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  digitalWrite(trig, HIGH); //초음파 발생
-  delayMicroseconds(10); //0.01초 대기
-  digitalWrite(trig, LOW); //초음파 멈춤
- 
-  int distance = pulseIn(echo, HIGH) * 17 /1000;
+  int duration,distance;
+  digitalWrite(trigpin,HIGH);
+  
+  delayMicroseconds(1000);
+  digitalWrite(trigpin,LOW);
+  
+  duration=pulseIn(echopin,HIGH);
 
-  Serial.print(distance);
-  Serial.print("cm");
-  Serial.println();
+  distance=(duration / 2) / 29.1;
+  Serial.println("cm: ");
+  Serial.println(distance);
 
-  if(distance > 20)
+  if( (distance >0) &&  (distance <= 3) )
+  {digitalWrite(led1,LOW);
+   digitalWrite(led2,HIGH);
+   digitalWrite(led3,HIGH);
+  } else
+  if( (distance > 3) && (distance <= 6)) 
   {
-    digitalWrite(led2, LOW);
-    digitalWrite(led1, LOW);
-  }
-  if(distance > 15 & distance <= 20)
+  digitalWrite(led1,HIGH);
+  digitalWrite(led2,LOW);
+  digitalWrite(led3,HIGH);
+  } else
+  if( (distance > 6) && (distance <= 12) )
   {
-    digitalWrite(led2, HIGH);
-    digitalWrite(led1, LOW);
+    digitalWrite(led1,HIGH);
+    digitalWrite(led2,HIGH);
+    digitalWrite(led3,LOW);
   }
-  if(distance > 7 & distance <= 15)
-  {
-    digitalWrite(led1, HIGH);
-    digitalWrite(led2, LOW);
-  }
-  if(distance > 0 & distance <= 7)
-  {
-    digitalWrite(led1, HIGH);
-    digitalWrite(led2, LOW);
-    delay(100);
-    digitalWrite(led2, HIGH);
-    digitalWrite(led1, LOW);
-    delay(100);
-  }
-} 
+}
