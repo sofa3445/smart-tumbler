@@ -1,3 +1,8 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+ 
+#include <SoftwareSerial.h>
+
 int trigpin=6;
 int echopin=7;
 
@@ -6,8 +11,19 @@ int led2 =10;
 int led3 =11;
 int led4=3;
 
+LiquidCrystal_I2C lcd(0x3F,16,2);  // set the LCD address to 0x20 for a 16 chars and 2 line display
+ 
+SoftwareSerial BTSerial(2, 3); //Connect HC-06 TX,RX
+
 void setup() {
  Serial.begin(9600);
+  Serial.println("good day!");
+  BTSerial.begin(9600);  // set the data rate for the BT port
+ 
+  lcd.init();                      // initialize the lcd
+ 
+  lcd.backlight();
+  lcd.print("Hello, world!"); // Print initial message.
   
  pinMode(trigpin, OUTPUT);
  pinMode(echopin,INPUT);
@@ -20,7 +36,38 @@ void setup() {
  delay(1000);
 }
 
+/* time */
+unsigned long prevReceivedTime = 0;
+unsigned long curReceivedTime = 0;
+int currentLine = 0;  // Display character at 0 or 1 line
+ 
+
 void loop() {
+
+  // BT --> Data --> Arduino --> LCD
+  if (BTSerial.available()) {
+    char c = BTSerial.read();
+ 
+    curReceivedTime = millis();
+    if(curReceivedTime - prevReceivedTime > 1000) {  // (1)
+      currentLine++;
+      if(currentLine > 1) {
+        currentLine = 0;
+        lcd.clear();
+      }
+      lcd.setCursor(0, currentLine);
+    }
+ 
+    Serial.print(c);
+    lcd.write(c);
+ 
+    prevReceivedTime = curReceivedTime;
+  }
+ 
+  // PC --> Data --> Arduino --> Data --> BT
+  if (Serial.available()) {
+    BTSerial.write(Serial.read());  // (2)
+  }
   int duration,distance;
   digitalWrite(trigpin,HIGH);
   
@@ -60,4 +107,7 @@ void loop() {
     digitalWrite(led3,HIGH);
     digitalWrite(led4,LOW);
   }
+
+
+  
 }
