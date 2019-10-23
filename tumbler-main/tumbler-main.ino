@@ -25,7 +25,7 @@ void setup() {
   lcd.print("Have a good day"); // Print initial message.
   
  pinMode(trigpin, OUTPUT);
- pinMode(echopin,INPUT);s
+ pinMode(echopin,INPUT);
  
  pinMode(led1,OUTPUT);
  pinMode(led2,OUTPUT);
