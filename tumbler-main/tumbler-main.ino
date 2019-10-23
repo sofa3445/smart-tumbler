@@ -1,6 +1,5 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
- 
 #include <SoftwareSerial.h>
 
 int trigpin=6;
@@ -9,7 +8,7 @@ int echopin=7;
 int led1 =9;
 int led2 =10;
 int led3 =11;
-int led4=3;
+///int led4=3;
 
 LiquidCrystal_I2C lcd(0x3F,16,2);  // set the LCD address to 0x20 for a 16 chars and 2 line display
  
@@ -23,7 +22,7 @@ void setup() {
   lcd.init();                      // initialize the lcd
  
   lcd.backlight();
-  lcd.print("Hello, world!"); // Print initial message.
+  lcd.print("Have a good day"); // Print initial message.
   
  pinMode(trigpin, OUTPUT);
  pinMode(echopin,INPUT);
@@ -31,7 +30,7 @@ void setup() {
  pinMode(led1,OUTPUT);
  pinMode(led2,OUTPUT);
  pinMode(led3,OUTPUT);
- pinMode(led4,OUTPUT);
+ ///pinMode(led4,OUTPUT);
 
  delay(1000);
 }
@@ -84,28 +83,28 @@ void loop() {
   {digitalWrite(led1,LOW);
    digitalWrite(led2,LOW);
    digitalWrite(led3,LOW);
-   digitalWrite(led4,LOW);
+  /// digitalWrite(led4,LOW);
   } else
   if( (distance > 3) && (distance <= 6))///물 중간
   {
   digitalWrite(led1,HIGH);
   digitalWrite(led2,LOW);
   digitalWrite(led3,LOW);
-  digitalWrite(led4,LOW);
+  ///digitalWrite(led4,LOW);
   } else
   if( (distance > 6) && (distance <= 9 ) )///물 중간
   {
     digitalWrite(led1,HIGH);
     digitalWrite(led2,HIGH);
     digitalWrite(led3,LOW);
-    digitalWrite(led4,LOW);
+    ///digitalWrite(led4,LOW);
   }
   if( (distance > 9) && (distance <= 15 ) )///물 부족
   {
     digitalWrite(led1,HIGH);
     digitalWrite(led2,HIGH);
     digitalWrite(led3,HIGH);
-    digitalWrite(led4,LOW);
+    ///digitalWrite(led4,LOW);
   }
 
 
