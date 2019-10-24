@@ -1,4 +1,4 @@
-/**/
+ /**/
 //lcd 모니터 헤더파일
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
@@ -10,7 +10,7 @@
 
 //DHT11 헤더파일
 #include <DHT.h>
-
+String last_list;
 int temp_pin = A0;
 DHT dht(temp_pin, DHT11); //DHT 설정.
 int temp;
@@ -55,10 +55,8 @@ void setup() {
 /* time */
 unsigned long prevReceivedTime = 0;
 unsigned long curReceivedTime = 0;
-int currentLine = 0;  // Display character at 0 or 1 line
 
 void loop() {
-  Blynk.run(); //Blynk 앱과의 통신 시작
   
   temp = dht.readTemperature(); //온도 변수 초기화
   
@@ -77,6 +75,7 @@ void loop() {
   Serial.print("cm: "); //시리얼 모니터에 뚜껑부터 수면까지의 거리 표시
   Serial.println(distance);
 
+  Blynk.run(); //Blynk 앱으로 센서값 수신, lcd 에 문자열 송신
 /******************** led 제어 ***************************/
 
   if(temp<50){ // 49도 이하일수록 파란색
@@ -129,13 +128,14 @@ BLYNK_READ(V2) //Display remains of beverage at the Blynk widget
 
 BLYNK_WRITE(V1) //Display the to-do list at the Serial moniter
 {
-  char ToDo_list = param.asStr();
+  lcd.clear();
+  lcd.setCursor(0, 1);
+  lcd.print(last_list);
+  String ToDo_list = param.asStr();
   // assigning incoming value from pin V1 to a variable
-    lcd.setCursor(0, currentLine);
-    lcd.write(ToDo_list);
-    
-  Serial.print("To do : ");
-  Serial.println(ToDo_list);
+  lcd.setCursor(0, 0);
+  lcd.print(ToDo_list);
+  last_list = ToDo_list;
 }
 
 BLYNK_READ(V0) //Display temperature at the Blynk widget
