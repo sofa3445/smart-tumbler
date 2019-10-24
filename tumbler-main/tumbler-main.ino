@@ -1,94 +1,70 @@
+/**/
+//lcd 모니터 헤더파일
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+
+//블루투스 및 Blynk 앱 헤더파일
 #include <SoftwareSerial.h>
-#include <DHT.h>
 #define BLYNK_PRINT Serial
 #include <BlynkSimpleStream.h>
 
+//DHT11 헤더파일
+#include <DHT.h>
+
 int temp_pin = A0;
-DHT dht(temp_pin, DHT11); //DHT 설정. DHT dht(핀번호, DHT종류)
+DHT dht(temp_pin, DHT11); //DHT 설정.
+int temp;
+int distance;
 int trigpin=6;
 int echopin=5;
 
 int led1 =9;
 int led2 =10;
 int led3 =11;
-int rgb_r = 4; //rgb 중 빨간색
+int rgb_r = 4; //rgb 빨간색
 int rgb_g = 3; //`` 초록색
 int rgb_b = 2; //`` 파란색
 
-char auth[] = "blsfwPaH3WLWbKO6IUdtimB5z4b32gDE";
+char auth[] = "blsfwPaH3WLWbKO6IUdtimB5z4b32gDE"; //Blynk 앱 통신을 위한 토큰
 
 SoftwareSerial SwSerial(7, 8); // RX, TX
-SoftwareSerial BTSerial(7, 8); //Connect HC-06 TX,RX
 
 LiquidCrystal_I2C lcd(0x3F,16,2);  // set the LCD address to 0x20 for a 16 chars and 2 line display
 
 void setup() {
- Serial.begin(9600);
+  Serial.begin(9600);
   Serial.println("good day!");
-  BTSerial.begin(9600);  // set the data rate for the BT port
- 
-  lcd.init();                      // initialize the lcd
- 
+  lcd.init(); // initialize the lcd
   lcd.backlight();
   lcd.print("Have a good day"); // Print initial message.
-                        
- pinMode(trigpin, OUTPUT);
- pinMode(echopin,INPUT);
- 
- pinMode(led1,OUTPUT);
- pinMode(led2,OUTPUT);
- pinMode(led3,OUTPUT);
- pinMode(rgb_r,OUTPUT);
- pinMode(rgb_g,OUTPUT);
- pinMode(rgb_b,OUTPUT);
- 
- SwSerial.begin(9600);
- Blynk.begin(SwSerial, auth);
- delay(1000);
+  
+  pinMode(trigpin, OUTPUT);
+  pinMode(echopin,INPUT);
+  pinMode(led1,OUTPUT);
+  pinMode(led2,OUTPUT);
+  pinMode(led3,OUTPUT);
+  pinMode(rgb_r,OUTPUT);
+  pinMode(rgb_g,OUTPUT);
+  pinMode(rgb_b,OUTPUT);
+  
+  SwSerial.begin(9600);
+  Blynk.begin(SwSerial, auth);
+  delay(1000);
 }
 
 /* time */
 unsigned long prevReceivedTime = 0;
 unsigned long curReceivedTime = 0;
 int currentLine = 0;  // Display character at 0 or 1 line
- 
 
 void loop() {
-
-  Blynk.run();
+  Blynk.run(); //Blynk 앱과의 통신 시작
   
-  int temp = dht.readTemperature(); //온도 변수 선언,초기화
+  temp = dht.readTemperature(); //온도 변수 초기화
   
-  // BT --> Data --> Arduino --> LCD
-  if (BTSerial.available()) {
-    char c = BTSerial.read();
- 
-    curReceivedTime = millis();
-    if(curReceivedTime - prevReceivedTime > 1000) {  // (1)
-      currentLine++;
-      if(currentLine > 1) {
-        currentLine = 0;
-        lcd.clear();
-      }
-      lcd.setCursor(0, currentLine);
-    }
- 
-    Serial.print(c);
-    lcd.write(c);
- 
-    prevReceivedTime = curReceivedTime;
-  }
- 
-  // PC --> Data --> Arduino --> Data --> BT
-  if (Serial.available()) {
-    BTSerial.write(Serial.read());  // (2)
-  }
-  int duration,distance;
+  int duration; //거리 변수 선언
   digitalWrite(trigpin,HIGH);
   
-  delayMicroseconds(1000);
   digitalWrite(trigpin,LOW);
   
   duration=pulseIn(echopin,HIGH);
@@ -144,5 +120,25 @@ void loop() {
     digitalWrite(led3,LOW);
     ///digitalWrite(led4,HIGH);
   }
+}
 
+BLYNK_READ(V2) //Display remains of beverage at the Blynk widget
+{
+  Blynk.virtualWrite(V2, abs(15-distance)*30);
+}
+
+BLYNK_WRITE(V1) //Display the to-do list at the Serial moniter
+{
+  char ToDo_list = param.asStr();
+  // assigning incoming value from pin V1 to a variable
+    lcd.setCursor(0, currentLine);
+    lcd.write(ToDo_list);
+    
+  Serial.print("To do : ");
+  Serial.println(ToDo_list);
+}
+
+BLYNK_READ(V0) //Display temperature at the Blynk widget
+{
+  Blynk.virtualWrite(V0, temp);
 }
